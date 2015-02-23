@@ -16,8 +16,8 @@ func (b *Board) Encode() (err error) {
 	if err = a.WriteByte(byte(b.Size)); err != nil {
 		return err
 	}
-	//use flate to comprese
-	dict := []byte{3, 2, 1}
+	//use flate to compress
+	dict := []byte{2, 1, 0}
 	w, err := flate.NewWriterDict(&a, flate.BestCompression, dict)
 	for _, v := range b.Grid {
 		for _, s := range v {
@@ -47,9 +47,8 @@ func (b *Board) Decode(str string) (err error) {
 	size := int(data[0])
 	b.Init(size)
 	//set up flate reader with dict
-	dict := []byte{3, 2, 1}
-	rest := bytes.NewReader(data[1:])
-	r := flate.NewReaderDict(rest, dict)
+	dict := []byte{2, 1, 0}
+	r := flate.NewReaderDict(bytes.NewReader(data[1:]), dict)
 	p := bufio.NewReader(r)
 	for x := 0; x < size; x++ {
 		for y := 0; y < size; y++ {
