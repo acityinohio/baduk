@@ -16,11 +16,20 @@ func TestInit(t *testing.T) {
 	if err != nil {
 		t.Error("Error Initializing:", err)
 	}
+	return
+}
+
+func TestEncode(t *testing.T) {
+	var b Board
+	b.Init(13)
+	err := b.Encode()
+	if err != nil {
+		t.Error("Error Encoding:", err)
+	}
 	expectEncode := "DXicSh0qABAAAP__JWRCrg=="
 	if b.State != expectEncode {
 		t.Error("Expected b.State: ", expectEncode, " got ", b.State)
 	}
-	return
 }
 
 func TestDecode(t *testing.T) {

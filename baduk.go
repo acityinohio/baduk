@@ -47,10 +47,6 @@ func (b *Board) Init(size int) (err error) {
 		//Allocate the intermediate slices
 		b.Grid[i] = make([]Piece, size)
 	}
-	//Encode empty state into string
-	if err = b.Encode(); err != nil {
-		return err
-	}
 	return
 }
 
