@@ -1,13 +1,16 @@
+//Package baduk implements a library for playing games
+//of Baduk/Go. It's optimized for code simplicity,
+//and does not include any AI support.
 package baduk
 
-import (
-	"bufio"
-	"bytes"
-	"compress/zlib"
-	"encoding/base64"
-	"errors"
-)
+import "errors"
 
+//A Board represents information about the state
+//of a Go game. Size represents the size of the board,
+//Grid is the storage of Pieces, BlackScore and WhiteScore
+//store the currently calculated scores of the Board, while
+//State represents a compressed, base64-encoded string of
+//the state of the board, suitable for use in URLs.
 type Board struct {
 	Size       int
 	Grid       [][]Piece
@@ -16,6 +19,10 @@ type Board struct {
 	State      string
 }
 
+//A Piece represents information about a piece on the
+//Board. When both Black and White are false, the Piece
+//is considered empty. If both Black and White are true,
+//something is seriously wrong with the library.
 type Piece struct {
 	Black bool
 	White bool
@@ -36,8 +43,8 @@ func (p *Piece) NotEmpty() error {
 
 //Initializes an empty Board
 func (b *Board) Init(size int) (err error) {
-	if size < 3 || size > 19 {
-		err = errors.New("Size of board must be between 3 and 19")
+	if size < 4 || size > 19 {
+		err = errors.New("Size of board must be between 4 and 19")
 		return
 	}
 	b.Size = size
@@ -82,7 +89,9 @@ func (b *Board) SetB(x, y int) (err error) {
 
 //Sets a Piece to empty on the Board
 //x, y in range from 1 to Board.Size
-func (b *Board) SetE(x, y int) (err error) {
+//Used only by the Decode and Score
+//function and not publicly scoped.
+func (b *Board) setE(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
@@ -103,76 +112,38 @@ func checkRange(x, y, size int) error {
 	}
 }
 
-//Encodes the Board state into a URL-safe string
-func (b *Board) Encode() (err error) {
-	var a bytes.Buffer
-	//first byte of the buffer is size
-	if err = a.WriteByte(byte(b.Size)); err != nil {
-		return err
-	}
-	//use zlib to compress
-	w := zlib.NewWriter(&a)
-	for _, v := range b.Grid {
-		for _, s := range v {
+//Creates pretty string, suitable for use
+//by fmt.Printf or any logging functions.
+//Note that black and white circles are
+//reversed compared to their unicode code points;
+//this assumes your terminal has a dark background.
+func (b *Board) PrettyString() (str string) {
+	str = "\n"
+	blk := "\u25cb"
+	wht := "\u25cf"
+	for x := 0; x < b.Size; x++ {
+		for y := 0; y < b.Size; y++ {
+			p := b.Grid[x][y]
 			switch {
-			case s.Black:
-				w.Write([]byte("b"))
-			case s.White:
-				w.Write([]byte("w"))
+			case p.Black:
+				str += blk
+			case p.White:
+				str += wht
 			default:
-				w.Write([]byte("e"))
+				str += " "
+			}
+			if y != b.Size-1 {
+				str += " - "
 			}
 		}
-	}
-	w.Close()
-	b.State = base64.URLEncoding.EncodeToString(a.Bytes())
-	return
-}
-
-//Initializes a Board from a URL-safe string
-//encoded with Board.Encode
-func (b *Board) Decode(str string) (err error) {
-	data, err := base64.URLEncoding.DecodeString(str)
-	if err != nil {
-		return
-	}
-	//first byte of the data is size
-	size := int(data[0])
-	b.Init(size)
-	//set up zlib reader
-	rest := bytes.NewReader(data[1:])
-	r, err := zlib.NewReader(rest)
-	p := bufio.NewReader(r)
-	if err != nil {
-		return
-	}
-	for x := 0; x < size; x++ {
-		for y := 0; y < size; y++ {
-			c, errr := p.ReadByte()
-			if errr != nil {
-				err = errr
-				return
+		str += "\n"
+		if x != b.Size-1 {
+			for y := 0; y < b.Size-1; y++ {
+				str += "| - "
 			}
-			switch c {
-			case []byte("b")[0]:
-				err = b.SetB(x, y)
-			case []byte("w")[0]:
-				err = b.SetW(x, y)
-			case []byte("e")[0]:
-				err = b.SetE(x, y)
-			default:
-				err = errors.New("Piece not recognized during decode")
-			}
-			if err != nil {
-				return
-			}
+			str += "|\n"
 		}
 	}
-	r.Close()
+	str += "\n"
 	return
-}
-
-//Scores the Board, and
-//empties Pieces without liberties
-func (b *Board) Score() {
 }
