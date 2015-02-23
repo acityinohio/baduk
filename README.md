@@ -8,6 +8,8 @@ I like Go (the game, also known as Baduk) and Go (the programming language) and 
 
 But mainly, I built this with the express (and eventual) purpose to play Go with my former (and future?) roommate, and he's much more amenable to my ideas when they involve wordplay, puns, recursive thinking, and self-references. (hi Steve!)
 
+Further down the line, once Go reaches 1.5, I'm even going to venture making a Android app. So you can Go on the Go on the Go. :D
+
 ##Usage
 
 Import the package like any remote repo in Go:
@@ -20,7 +22,7 @@ Then initialize a baduk.Board
 
 ```go
 var b baduk.Board
-err := b.Init(13) //Size can be anywhere from 3 to 19, inclusive
+err := b.Init(13) //Size can be anywhere from 4 to 19, inclusive
 //don't forget your errors!
 if err != nil {
 	//deal with err
@@ -36,9 +38,11 @@ err = b.SetW(12,12) //Sets white piece at 12,12
 if err != nil {
 	//dealWithIt.gif
 }
+//You can even print it prettily on the terminal!
+fmt.Printf(b.PrettyString()) 
 ```
 
-My favorite part (and what will help eventually with the whole web app shtick) is that every state of the board can be Encoded/Decoded into a URL-friendly base64-encoded string. Check it:
+My favorite part (and what will help eventually with the whole web app shtick) is that every state of the board can be Encoded/Decoded into a compressed, URL-friendly base64-encoded string. Check it:
 
 ```go
 var err error
@@ -57,10 +61,10 @@ This will be super useful for ephemeral, webapp-based games with canonical URLs.
 
 You can test the package with the handy "go test" command---the tests are included in the baduk_tests.go package.
 
-##To Do:
+##To Do
 
 A whole lot. Scoring isn't working yet, which is kind of necessary. More test coverage is needed. Just a whole bunch of everything.
 
 ##Why not call this package Go?
 
-Yes, we all get off on Xzibit memes, but that goes too far, even for me. The name collisions alone would drive me bonkers.
+Yes, we all get off on Xzibit memes, but that goes too far, even for me. Think of the name collisions/children.
