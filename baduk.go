@@ -1,6 +1,6 @@
 //Package baduk implements a library for playing games
 //of Baduk/Go. It's optimized for code simplicity,
-//and does not include any AI support.
+//and doesn't include any AI support.
 package baduk
 
 import "errors"
@@ -20,23 +20,17 @@ type Board struct {
 //A Piece represents information about a piece on the
 //Board. When both Black and White are false, the Piece
 //is considered empty. If both Black and White are true,
-//something is seriously wrong with the library.
+//something is seriously wrong with the library. Contains
+//pointers to adjacent pieces. If it's a border, the pointer
+//is null.
 type Piece struct {
 	Black bool
 	White bool
-}
-
-//Returns true if piece is empty
-func (p *Piece) empty() bool {
-	return !(p.Black || p.White)
-}
-
-//Returns err if piece is not empty
-func (p *Piece) NotEmpty() error {
-	if !p.empty() {
-		return errors.New("Piece is not empty")
-	}
-	return nil
+	Empty bool
+	Up    *Piece //y-1
+	Down  *Piece //y+1
+	Left  *Piece //x-1
+	Right *Piece //x+1
 }
 
 //Initializes an empty Board
@@ -52,6 +46,38 @@ func (b *Board) Init(size int) (err error) {
 		//Allocate the intermediate slices
 		b.Grid[i] = make([]Piece, size)
 	}
+	//Set Pieces to Empty, connect them via pointers
+	for y := 0; y < size; y++ {
+		for x := 0; x < size; x++ {
+			up, down, left, right := true, true, true, true
+			b.Grid[y][x].Empty = true
+			//If border, don't connect
+			if y == 0 {
+				up = false
+			}
+			if y == size-1 {
+				down = false
+			}
+			if x == 0 {
+				left = false
+			}
+			if x == size-1 {
+				right = false
+			}
+			if up {
+				b.Grid[y][x].Up = &b.Grid[y-1][x]
+			}
+			if down {
+				b.Grid[y][x].Down = &b.Grid[y+1][x]
+			}
+			if left {
+				b.Grid[y][x].Left = &b.Grid[y][x-1]
+			}
+			if right {
+				b.Grid[y][x].Right = &b.Grid[y][x+1]
+			}
+		}
+	}
 	//Encode empty State
 	err = b.Encode()
 	return
@@ -63,11 +89,13 @@ func (b *Board) SetW(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
-	if err = b.Grid[y][x].NotEmpty(); err != nil {
-		return err
+	if !b.Grid[y][x].Empty {
+		err = errors.New("Piece is not empty")
+		return
 	}
 	b.Grid[y][x].White = true
 	b.Grid[y][x].Black = false
+	b.Grid[y][x].Empty = false
 	//Calls Score to update Board
 	//b.Score()
 	return
@@ -79,11 +107,13 @@ func (b *Board) SetB(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
-	if err = b.Grid[y][x].NotEmpty(); err != nil {
-		return err
+	if !b.Grid[y][x].Empty {
+		err = errors.New("Piece is not empty")
+		return
 	}
-	b.Grid[y][x].Black = true
 	b.Grid[y][x].White = false
+	b.Grid[y][x].Black = true
+	b.Grid[y][x].Empty = false
 	//Calls Score to update Board
 	//b.Score()
 	return
@@ -91,14 +121,15 @@ func (b *Board) SetB(x, y int) (err error) {
 
 //Sets a Piece to empty on the Board
 //x, y in range from 1 to Board.Size
-//Used only by the Decode and Score
-//function and not publicly scoped.
+//Used only internally and not
+//publicly scoped.
 func (b *Board) setE(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
 	b.Grid[y][x].Black = false
 	b.Grid[y][x].White = false
+	b.Grid[y][x].Empty = true
 	return
 }
 

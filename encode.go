@@ -45,7 +45,10 @@ func (b *Board) Decode(str string) (err error) {
 	}
 	//first byte of the data is size
 	size := int(data[0])
-	b.Init(size)
+	err = b.Init(size)
+	if err != nil {
+		return
+	}
 	//set up flate reader with dict
 	dict := []byte{2, 1, 0}
 	r := flate.NewReaderDict(bytes.NewReader(data[1:]), dict)
