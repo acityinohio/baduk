@@ -29,7 +29,7 @@ if err != nil {
 }
 ```
 
-You can set pieces using (x,y) coordinates, anywhere from (0,0) to (size-1, size-1)
+You can set pieces using (x,y) coordinates, anywhere from (0,0) to (size-1, size-1). The origin (0,0) is considered the top left of the board.
 
 ```go
 var err error
@@ -45,14 +45,13 @@ fmt.Printf(b.PrettyString())
 My favorite part (and what will help eventually with the whole web app shtick) is that every state of the board can be Encoded/Decoded into a compressed, URL-friendly base64-encoded string. Check it:
 
 ```go
-var err error
-err = b.Encode() //Encodes base64-string into b.State
+enc, err := b.Encode() //Encodes base64-string into enc
 if err != nil {
 	//dealWithIt.gif
 }
-fmt.Println(b.State) //Now do whatever you want with the string
+fmt.Println(enc) //Now do whatever you want with the string
 var c baduk.Board
-err = c.Decode(b.State) //...like create a new board with the same state
+err = c.Decode(enc) //...like create a new board with the same state
 ```
 
 This will be super useful for ephemeral, webapp-based games with canonical URLs.
@@ -63,7 +62,7 @@ You can test the package with the handy "go test" command---the tests are includ
 
 ##To Do
 
-A whole lot. Scoring isn't working yet, which is kind of necessary. More test coverage is needed. Just a whole bunch of everything.
+A whole lot. Scoring isn't working yet, which is kind of necessary. Setting pieces in illegal positions are not protected yet. More test coverage is needed. Just a whole bunch of everything.
 
 ##Why not call this package Go?
 

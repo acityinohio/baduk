@@ -7,22 +7,15 @@ import "errors"
 
 //A Board represents information about the state
 //of a Go game. Size represents the size of the board,
-//Grid is the storage of Pieces, BlackScore and WhiteScore
-//store the currently calculated scores of the Board, while
-//State represents a compressed, base64-encoded string of
-//the state of the board, suitable for use in URLs.
+//Grid is the storage of Pieces.
 type Board struct {
-	Size  int
-	Grid  [][]Piece
-	State string
+	Size int
+	Grid [][]Piece
 }
 
 //A Piece represents information about a piece on the
-//Board. When both Black and White are false, the Piece
-//is considered empty. If both Black and White are true,
-//something is seriously wrong with the library. Contains
-//pointers to adjacent pieces. If it's a border, the pointer
-//is null.
+//Board. Contains pointers to adjacent pieces. If it's
+//a border, the pointer is nil.
 type Piece struct {
 	Black bool
 	White bool
@@ -78,8 +71,6 @@ func (b *Board) Init(size int) (err error) {
 			}
 		}
 	}
-	//Encode empty State
-	err = b.Encode()
 	return
 }
 
@@ -96,8 +87,6 @@ func (b *Board) SetW(x, y int) (err error) {
 	b.Grid[y][x].White = true
 	b.Grid[y][x].Black = false
 	b.Grid[y][x].Empty = false
-	//Calls Score to update Board
-	//b.Score()
 	return
 }
 
@@ -114,35 +103,7 @@ func (b *Board) SetB(x, y int) (err error) {
 	b.Grid[y][x].White = false
 	b.Grid[y][x].Black = true
 	b.Grid[y][x].Empty = false
-	//Calls Score to update Board
-	//b.Score()
 	return
-}
-
-//Sets a Piece to empty on the Board
-//x, y in range from 1 to Board.Size
-//Used only internally and not
-//publicly scoped.
-func (b *Board) setE(x, y int) (err error) {
-	if err = checkRange(x, y, b.Size); err != nil {
-		return err
-	}
-	b.Grid[y][x].Black = false
-	b.Grid[y][x].White = false
-	b.Grid[y][x].Empty = true
-	return
-}
-
-//Checks x,y against size
-func checkRange(x, y, size int) error {
-	switch {
-	case x < 0 || x >= size:
-		return errors.New("x out of range")
-	case y < 0 || y >= size:
-		return errors.New("y out of range")
-	default:
-		return nil
-	}
 }
 
 //Creates pretty string, suitable for use

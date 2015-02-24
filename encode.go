@@ -9,12 +9,12 @@ import (
 )
 
 //Encodes the Board state into a compressed,
-//base64-encoded URL-safe string
-func (b *Board) Encode() (err error) {
+//base64-encoded URL-safe string enc.
+func (b *Board) Encode() (enc string, err error) {
 	var a bytes.Buffer
 	//first byte of the buffer is size
 	if err = a.WriteByte(byte(b.Size)); err != nil {
-		return err
+		return
 	}
 	//use flate to compress
 	dict := []byte{2, 1, 0}
@@ -32,7 +32,7 @@ func (b *Board) Encode() (err error) {
 		}
 	}
 	w.Close()
-	b.State = base64.URLEncoding.EncodeToString(a.Bytes())
+	enc = base64.URLEncoding.EncodeToString(a.Bytes())
 	return
 }
 
@@ -53,8 +53,8 @@ func (b *Board) Decode(str string) (err error) {
 	dict := []byte{2, 1, 0}
 	r := flate.NewReaderDict(bytes.NewReader(data[1:]), dict)
 	p := bufio.NewReader(r)
-	for x := 0; x < size; x++ {
-		for y := 0; y < size; y++ {
+	for y := 0; y < size; y++ {
+		for x := 0; x < size; x++ {
 			c, errr := p.ReadByte()
 			if errr != nil {
 				err = errr
