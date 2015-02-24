@@ -12,11 +12,9 @@ import "errors"
 //State represents a compressed, base64-encoded string of
 //the state of the board, suitable for use in URLs.
 type Board struct {
-	Size       int
-	Grid       [][]Piece
-	BlackScore int
-	WhiteScore int
-	State      string
+	Size  int
+	Grid  [][]Piece
+	State string
 }
 
 //A Piece represents information about a piece on the
@@ -54,6 +52,8 @@ func (b *Board) Init(size int) (err error) {
 		//Allocate the intermediate slices
 		b.Grid[i] = make([]Piece, size)
 	}
+	//Encode empty State
+	err = b.Encode()
 	return
 }
 
@@ -63,12 +63,13 @@ func (b *Board) SetW(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
-	if err = b.Grid[x][y].NotEmpty(); err != nil {
+	if err = b.Grid[y][x].NotEmpty(); err != nil {
 		return err
 	}
-	b.Grid[x][y].White = true
+	b.Grid[y][x].White = true
+	b.Grid[y][x].Black = false
 	//Calls Score to update Board
-	b.Score()
+	//b.Score()
 	return
 }
 
@@ -78,12 +79,13 @@ func (b *Board) SetB(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
-	if err = b.Grid[x][y].NotEmpty(); err != nil {
+	if err = b.Grid[y][x].NotEmpty(); err != nil {
 		return err
 	}
-	b.Grid[x][y].Black = true
+	b.Grid[y][x].Black = true
+	b.Grid[y][x].White = false
 	//Calls Score to update Board
-	b.Score()
+	//b.Score()
 	return
 }
 
@@ -95,8 +97,8 @@ func (b *Board) setE(x, y int) (err error) {
 	if err = checkRange(x, y, b.Size); err != nil {
 		return err
 	}
-	b.Grid[x][y].Black = false
-	b.Grid[x][y].White = false
+	b.Grid[y][x].Black = false
+	b.Grid[y][x].White = false
 	return
 }
 
@@ -121,9 +123,9 @@ func (b *Board) PrettyString() (str string) {
 	str = "\n"
 	blk := "\u25cb"
 	wht := "\u25cf"
-	for x := 0; x < b.Size; x++ {
-		for y := 0; y < b.Size; y++ {
-			p := b.Grid[x][y]
+	for y := 0; y < b.Size; y++ {
+		for x := 0; x < b.Size; x++ {
+			p := b.Grid[y][x]
 			switch {
 			case p.Black:
 				str += blk
@@ -132,13 +134,13 @@ func (b *Board) PrettyString() (str string) {
 			default:
 				str += " "
 			}
-			if y != b.Size-1 {
+			if x != b.Size-1 {
 				str += " - "
 			}
 		}
 		str += "\n"
-		if x != b.Size-1 {
-			for y := 0; y < b.Size-1; y++ {
+		if y != b.Size-1 {
+			for x := 0; x < b.Size-1; x++ {
 				str += "| - "
 			}
 			str += "|\n"

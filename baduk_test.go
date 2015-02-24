@@ -22,10 +22,6 @@ func TestInit(t *testing.T) {
 func TestEncode(t *testing.T) {
 	var b Board
 	b.Init(13)
-	err := b.Encode()
-	if err != nil {
-		t.Error("Error Encoding:", err)
-	}
 	expectEncode := "DWIYKgAQAAD__w=="
 	if b.State != expectEncode {
 		t.Error("Expected b.State: ", expectEncode, " got ", b.State)
@@ -38,7 +34,7 @@ func TestEncode(t *testing.T) {
 		b.SetW(1, 1)
 		b.SetW(2, 2)
 		b.Encode()
-		t.Log(b.State) //generates "BGJiYmBgYGSAEQyAAAAA__8="
+		t.Log(b.State) //generates "BGJiYGAAUkAAJhgAAQAA__8="
 		t.Logf(b.PrettyString())
 	}
 }
@@ -54,7 +50,7 @@ func TestDecode(t *testing.T) {
 		t.Error("Expected size to be 13, got", b.Size)
 	}
 	//Check as generated above
-	str = "BGJiYmBgYGSAEQyAAAAA__8="
+	str = "BGJiYGAAUkAAJhgAAQAA__8h"
 	err = b.Decode(str)
 	if err != nil {
 		t.Error("Error Decoding:", err)

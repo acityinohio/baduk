@@ -1,6 +1,5 @@
 package baduk
 
-//Scores the Board, and
-//empties Pieces without liberties
+//Scores the Board
 func (b *Board) Score() {
 }
