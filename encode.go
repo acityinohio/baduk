@@ -62,11 +62,13 @@ func (b *Board) Decode(str string) (err error) {
 			}
 			switch c {
 			case dict[0]:
-				err = b.SetB(x, y)
+				b.Grid[y][x].Black = true
+				b.Grid[y][x].Empty = false
 			case dict[1]:
-				err = b.SetW(x, y)
+				b.Grid[y][x].White = true
+				b.Grid[y][x].Empty = false
 			case dict[2]:
-				err = b.setE(x, y)
+				b.Grid[y][x].Empty = true
 			default:
 				err = errors.New("Piece not recognized during decode")
 			}

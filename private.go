@@ -2,34 +2,43 @@ package baduk
 
 import "errors"
 
-//Sets a Piece to either black
-//or white, depending on the bool
+//Sets a Piece to either black or white
 func (b *Board) set(x int, y int, isBlack bool) (err error) {
-	if err = checkRange(x, y, b.Size); err != nil {
+	if err = b.checkRange(x, y); err != nil {
 		return err
 	}
 	if !b.Grid[y][x].Empty {
 		err = errors.New("Piece is not empty")
 		return
 	}
-	if b.Grid[y][x].hasLiberty() {
-		b.Grid[y][x].Black = isBlack
-		b.Grid[y][x].White = !isBlack
-		b.Grid[y][x].Empty = false
+	b.Grid[y][x].Black = isBlack
+	b.Grid[y][x].White = !isBlack
+	b.Grid[y][x].Empty = false
+	//Check if setting a piece captures opponent's adjacent chains
+	err = b.Grid[y][x].checkCapture(isBlack)
+	if err != nil {
+		//Reset to empty if there's an error
+		b.setE(x, y)
 		return
+	}
+	//If there are no liberties after checking opponent's chains,
+	//Check whether opponent captures chains connected to this move
+	if !b.Grid[y][x].hasLiberty() {
+		err = b.Grid[y][x].checkCapture(!isBlack)
+		if err != nil {
+			b.setE(x, y)
+			return
+		}
 	}
 	return
 }
 
-//Sets a Piece to empty on the Board
-//x, y in range from 1 to Board.Size
-func (b *Board) setE(x, y int) (err error) {
-	if err = checkRange(x, y, b.Size); err != nil {
-		return err
-	}
-	b.Grid[y][x].Black = false
-	b.Grid[y][x].White = false
-	b.Grid[y][x].Empty = true
+//Checks surrounding stones to see if
+//chains can be captured, empties
+//chains without liberties
+func (p *Piece) checkCapture(isBlack bool) (err error) {
+	//Check chain liberties for each direction
+	//Only check if chains are opposite of isBlack/not empty
 	return
 }
 
@@ -50,18 +59,20 @@ func (p *Piece) hasLiberty() bool {
 	return false
 }
 
-//Returns true if Piece adding
-//to chain with liberties
-func (p *Piece) hasChainLiberty(isBlack bool) bool {
-	return true
+//Sets a Piece to empty
+func (b *Board) setE(x, y int) {
+	b.Grid[y][x].Black = false
+	b.Grid[y][x].White = false
+	b.Grid[y][x].Empty = true
+	return
 }
 
 //Checks x,y against size
-func checkRange(x, y, size int) error {
+func (b *Board) checkRange(x, y int) error {
 	switch {
-	case x < 0 || x >= size:
+	case x < 0 || x >= b.Size:
 		return errors.New("x out of range")
-	case y < 0 || y >= size:
+	case y < 0 || y >= b.Size:
 		return errors.New("y out of range")
 	default:
 		return nil

@@ -76,7 +76,7 @@ func TestHasLiberty(t *testing.T) {
 	}
 	b.SetB(1, 0)
 	if b.Grid[0][0].hasLiberty() {
-		t.Error("Expected true, got false with piece at 0,0", b.Grid[0][0])
+		t.Error("Expected false, got true with piece at 0,0", b.Grid[0][0])
 		t.Logf(b.PrettyString())
 	}
 	if !b.Grid[1][1].hasLiberty() {
