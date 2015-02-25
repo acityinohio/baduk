@@ -2,6 +2,25 @@ package baduk
 
 import "errors"
 
+//Sets a Piece to either black
+//or white, depending on the bool
+func (b *Board) set(x int, y int, isBlack bool) (err error) {
+	if err = checkRange(x, y, b.Size); err != nil {
+		return err
+	}
+	if !b.Grid[y][x].Empty {
+		err = errors.New("Piece is not empty")
+		return
+	}
+	if b.Grid[y][x].hasLiberty() {
+		b.Grid[y][x].Black = isBlack
+		b.Grid[y][x].White = !isBlack
+		b.Grid[y][x].Empty = false
+		return
+	}
+	return
+}
+
 //Sets a Piece to empty on the Board
 //x, y in range from 1 to Board.Size
 func (b *Board) setE(x, y int) (err error) {
@@ -14,7 +33,7 @@ func (b *Board) setE(x, y int) (err error) {
 	return
 }
 
-//Returns true if piece has liberties
+//Returns true if Piece has liberties
 func (p *Piece) hasLiberty() bool {
 	if p.Up != nil && p.Up.Empty {
 		return true
@@ -29,6 +48,12 @@ func (p *Piece) hasLiberty() bool {
 		return true
 	}
 	return false
+}
+
+//Returns true if Piece adding
+//to chain with liberties
+func (p *Piece) hasChainLiberty(isBlack bool) bool {
+	return true
 }
 
 //Checks x,y against size

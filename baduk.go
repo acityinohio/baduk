@@ -74,35 +74,17 @@ func (b *Board) Init(size int) (err error) {
 	return
 }
 
-//Sets a Piece to white on the Board
-//x, y in range from 1 to Board.Size
-func (b *Board) SetW(x, y int) (err error) {
-	if err = checkRange(x, y, b.Size); err != nil {
-		return err
-	}
-	if !b.Grid[y][x].Empty {
-		err = errors.New("Piece is not empty")
-		return
-	}
-	b.Grid[y][x].White = true
-	b.Grid[y][x].Black = false
-	b.Grid[y][x].Empty = false
-	return
-}
-
 //Sets a Piece to black on the Board
 //x, y in range from 1 to Board.Size
 func (b *Board) SetB(x, y int) (err error) {
-	if err = checkRange(x, y, b.Size); err != nil {
-		return err
-	}
-	if !b.Grid[y][x].Empty {
-		err = errors.New("Piece is not empty")
-		return
-	}
-	b.Grid[y][x].White = false
-	b.Grid[y][x].Black = true
-	b.Grid[y][x].Empty = false
+	err = b.set(x, y, true)
+	return
+}
+
+//Sets a Piece to white on the Board
+//x, y in range from 1 to Board.Size
+func (b *Board) SetW(x, y int) (err error) {
+	err = b.set(x, y, false)
 	return
 }
 
