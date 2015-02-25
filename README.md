@@ -45,7 +45,7 @@ fmt.Printf(b.PrettyString())
 My favorite part (and what will help eventually with the whole web app shtick) is that every state of the board can be Encoded/Decoded into a compressed, URL-friendly base64-encoded string. Check it:
 
 ```go
-enc, err := b.Encode() //Encodes base64-string into enc
+enc, err := b.Encode() //Encodes URL-safe string into enc
 if err != nil {
 	//dealWithIt.gif
 }
