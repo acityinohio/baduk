@@ -2,7 +2,7 @@ package baduk
 
 import (
 	"errors"
-	"log"
+	"sync"
 )
 
 //Sets a Piece to either black or white
@@ -28,8 +28,7 @@ func (b *Board) set(x int, y int, isBlack bool) (err error) {
 }
 
 //Checks surrounding stones to see if
-//chains can be captured, empties
-//chains without liberties
+//chains can be captured
 func (p *Piece) checkCapture(checkWhite bool) {
 	//Check chain liberties for each direction
 	//Only check if piece isn't border, matches checkWhite
@@ -51,42 +50,37 @@ func (p *Piece) checkCapture(checkWhite bool) {
 
 //If chain has no liberties, Empty it
 func (p *Piece) checkChain(checkWhite bool) {
-	//Create map of Piece addresses representing chain
-	//Needs to be buffered to prevent deadlock
 	chainChan := make(chan map[*Piece]bool, 1)
 	libChan := make(chan bool)
 	done := make(chan bool)
+	var wg sync.WaitGroup
+	//Initialize channel containing map representing chain
 	go func() { chainChan <- make(map[*Piece]bool) }()
-	go crawler(p, checkWhite, chainChan, libChan, done)
-	for {
-		select {
-		//If no liberties found, "empty" all pieces in chain
-		case <-done:
-			emptyChain(<-chainChan)
-			return
-		//if liberty found, return
-		case <-libChan:
-			return
-		default:
-		}
+	//Crawl chain, use WaitGroup to detect when recursion finishes
+	wg.Add(1)
+	go crawler(p, checkWhite, chainChan, libChan, &wg)
+	//Send done signal if recursion is finished
+	go func() {
+		wg.Wait()
+		done <- true
+	}()
+	select {
+	//If no liberties found, "empty" all pieces in chain
+	case <-done:
+		emptyChain(<-chainChan)
+		return
+	//if liberty found, return
+	case <-libChan:
+		return
 	}
 }
 
 //Check up, down, left, right pieces (If not nil && same color as checkWhite)
 //if any adjacent checkWhite piece has liberties, quit without capturing
-//Otherwise, "travel" to it, add piece to map, check its directions for liberties
-//Keep traveling, but don't go to already traveled places in map
-func crawler(pi *Piece, checkWhite bool, chainChan chan map[*Piece]bool, libChan chan bool, done chan bool) {
-	/*go func() {
-		for {
-			select {
-			case <-done:
-				return
-			default:
-				still <- true
-			}
-		}
-	}()*/
+//Otherwise, crawl to it, check its directions for liberties
+//Recursively crawl, but don't go to already crawled places in chainChan
+func crawler(pi *Piece, checkWhite bool, chainChan chan map[*Piece]bool, libChan chan bool, wg *sync.WaitGroup) {
+	defer wg.Done()
 	chain := <-chainChan
 	chain[pi] = true
 	chainChan <- chain
@@ -95,22 +89,21 @@ func crawler(pi *Piece, checkWhite bool, chainChan chan map[*Piece]bool, libChan
 		return
 	}
 	if pi.Up != nil && pi.Up.White == checkWhite && !chain[pi.Up] {
-		log.Print("Going up", chain)
-		go crawler(pi.Up, checkWhite, chainChan, libChan, done)
+		wg.Add(1)
+		go crawler(pi.Up, checkWhite, chainChan, libChan, wg)
 	}
 	if pi.Down != nil && pi.Down.White == checkWhite && !chain[pi.Down] {
-		log.Print("Going down", chain)
-		go crawler(pi.Down, checkWhite, chainChan, libChan, done)
+		wg.Add(1)
+		go crawler(pi.Down, checkWhite, chainChan, libChan, wg)
 	}
 	if pi.Left != nil && pi.Left.White == checkWhite && !chain[pi.Left] {
-		log.Print("Going left", chain)
-		go crawler(pi.Left, checkWhite, chainChan, libChan, done)
+		wg.Add(1)
+		go crawler(pi.Left, checkWhite, chainChan, libChan, wg)
 	}
 	if pi.Right != nil && pi.Right.White == checkWhite && !chain[pi.Right] {
-		log.Print("Going right", chain)
-		go crawler(pi.Right, checkWhite, chainChan, libChan, done)
+		wg.Add(1)
+		go crawler(pi.Right, checkWhite, chainChan, libChan, wg)
 	}
-	done <- true
 	return
 }
 

@@ -39,7 +39,6 @@ func TestEncode(t *testing.T) {
 		b.SetW(2, 2)
 		enc, _ := b.Encode()
 		t.Log(enc) //generates "BGJiYGAAUkAAJhgAAQAA__8="
-		t.Logf(b.PrettyString())
 	}
 }
 
@@ -75,7 +74,6 @@ func TestHasLiberty(t *testing.T) {
 		t.Error("Error Decoding:", err)
 	}
 	b.SetB(1, 0)
-	t.Logf(b.PrettyString())
 	if b.Grid[0][0].hasLiberty() {
 		t.Error("Expected false, got true with piece at 0,0", b.Grid[0][0])
 		t.Logf(b.PrettyString())
@@ -90,8 +88,51 @@ func TestHasLiberty(t *testing.T) {
 func TestCheckCapture(t *testing.T) {
 	var b Board
 	b.Decode("BGJiYmAAUgyMDGCCARAAAP__")
-	t.Logf(b.PrettyString())
-	//b.SetB(0, 3)
+	//Attempt top corner black chain capture
 	b.SetW(2, 0)
-	t.Logf(b.PrettyString())
+	expectStr := "BGJgYIQiCA0IAAD__w=="
+	realStr, err := b.Encode()
+	if err != nil {
+		t.Error("Error encoding:", err)
+	}
+	if realStr != expectStr {
+		t.Error("Expected top board, got bottom board")
+		var c Board
+		c.Decode(expectStr)
+		t.Logf(c.PrettyString())
+		t.Logf(b.PrettyString())
+	}
+	//Reset board
+	b.Decode("BGJiYmAAUgyMDGCCARAAAP__")
+	//Attempt suicide on bottom left
+	//Should return to prior state
+	b.SetB(0, 3)
+	expectStr = "BGJiYmAAUgyMDGCCARAAAP__"
+	realStr, err = b.Encode()
+	if err != nil {
+		t.Error("Error encoding:", err)
+	}
+	if realStr != expectStr {
+		t.Error("Expected top board, got bottom board")
+		var c Board
+		c.Decode(expectStr)
+		t.Logf(c.PrettyString())
+		t.Logf(b.PrettyString())
+	}
+	//Reset board with new setup
+	b.Decode("BATAAQEAAACCoPD_6KgtDbE9AAD__w==")
+	//Attempt middle board chain captures
+	b.SetB(2, 3)
+	expectStr = "BGJiYmBgAkIGEAVEgAAAAP__"
+	realStr, err = b.Encode()
+	if err != nil {
+		t.Error("Error encoding:", err)
+	}
+	if realStr != expectStr {
+		t.Error("Expected top board, got bottom board")
+		var c Board
+		c.Decode(expectStr)
+		t.Logf(c.PrettyString())
+		t.Logf(b.PrettyString())
+	}
 }
