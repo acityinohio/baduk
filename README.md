@@ -29,7 +29,7 @@ if err != nil {
 }
 ```
 
-You can set pieces using (x,y) coordinates, anywhere from (0,0) to (size-1, size-1). The origin (0,0) is considered the top left of the board.
+You can set pieces using (x,y) coordinates, anywhere from (0,0) to (size-1, size-1). The origin (0,0) is considered the top left of the board. Setting pieces will automatically capture other chains (first checking the opponent's chains, then your own).
 
 ```go
 var err error
@@ -62,7 +62,7 @@ You can test the package with the handy "go test" command---the tests are includ
 
 ##To Do
 
-A whole lot. Scoring isn't working yet, which is kind of necessary. Setting pieces in illegal positions are not protected yet. More test coverage is needed. Just a whole bunch of everything.
+A whole lot. Scoring isn't working yet, which is kind of necessary. More test coverage is needed. Just a whole bunch of everything.
 
 ##Why not call this package Go?
 
