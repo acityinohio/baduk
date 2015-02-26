@@ -136,3 +136,12 @@ func TestCheckCapture(t *testing.T) {
 		t.Logf(b.PrettyString())
 	}
 }
+
+func TestScore(t *testing.T) {
+	var b Board
+	b.Init(13)
+	black, white := b.Score()
+	if black != 0 || white != 0 {
+		t.Error("For empty board, expected black: 0, white: 0, got black:", black, ", white:", white)
+	}
+}
