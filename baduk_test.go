@@ -75,6 +75,7 @@ func TestHasLiberty(t *testing.T) {
 		t.Error("Error Decoding:", err)
 	}
 	b.SetB(1, 0)
+	t.Logf(b.PrettyString())
 	if b.Grid[0][0].hasLiberty() {
 		t.Error("Expected false, got true with piece at 0,0", b.Grid[0][0])
 		t.Logf(b.PrettyString())
@@ -84,4 +85,13 @@ func TestHasLiberty(t *testing.T) {
 		t.Logf(b.PrettyString())
 	}
 	return
+}
+
+func TestCheckCapture(t *testing.T) {
+	var b Board
+	b.Decode("BGJiYmAAUgyMDGCCARAAAP__")
+	t.Logf(b.PrettyString())
+	//b.SetB(0, 3)
+	b.SetW(2, 0)
+	t.Logf(b.PrettyString())
 }
