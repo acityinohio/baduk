@@ -146,8 +146,8 @@ func TestScore(t *testing.T) {
 	}
 	b.Decode("BGJiYmBgYmRiYGQAEwyAAAAA__8=")
 	black, white = b.Score()
-	if black != 5 || white != 4 {
-		t.Error("For this board, expected black: 5, white: 4, got black:", black, ", white:", white)
+	if black != 8 || white != 6 {
+		t.Error("For this board, expected black: 8, white: 6, got black:", black, ", white:", white)
 		t.Errorf(b.PrettyString())
 	}
 }
