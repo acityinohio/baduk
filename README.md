@@ -40,6 +40,8 @@ if err != nil {
 }
 //You can even print it prettily on the terminal!
 fmt.Printf(b.PrettyString()) 
+//And get a score of the board if you'd like
+fmt.Printf(b.ScorePretty())
 ```
 
 My favorite part (and what will help eventually with the whole web app shtick) is that every state of the board can be Encoded/Decoded into a compressed, URL-friendly base64-encoded string. Check it:
@@ -56,13 +58,11 @@ err = c.Decode(enc) //...like create a new board with the same state
 
 This will be super useful for ephemeral, webapp-based games with canonical URLs.
 
+For more details about the package, I've sprinkled comments throughout it like a good idomatic Gopher, which means nice GoDocs. You can [check them out here.](http://godoc.org/github.com/acityinohio/baduk)
+
 ##Testing
 
 You can test the package with the handy "go test" command---the tests are included in the baduk_tests.go package.
-
-##To Do
-
-A whole lot. Scoring isn't working yet, which is kind of necessary. More test coverage is needed. Just a whole bunch of everything.
 
 ##Why not call this package Go?
 
