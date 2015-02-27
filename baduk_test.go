@@ -139,9 +139,15 @@ func TestCheckCapture(t *testing.T) {
 
 func TestScore(t *testing.T) {
 	var b Board
-	b.Init(13)
+	b.Init(4)
 	black, white := b.Score()
 	if black != 0 || white != 0 {
 		t.Error("For empty board, expected black: 0, white: 0, got black:", black, ", white:", white)
+	}
+	b.Decode("BGJiYmBgYmRiYGQAEwyAAAAA__8=")
+	black, white = b.Score()
+	if black != 5 || white != 4 {
+		t.Error("For this board, expected black: 5, white: 4, got black:", black, ", white:", white)
+		t.Errorf(b.PrettyString())
 	}
 }
