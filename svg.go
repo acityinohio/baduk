@@ -9,7 +9,7 @@ import "strconv"
 //to control size. Yay for resolution
 //independence!
 func (b *Board) PrettySVG() (svg string) {
-	svg += "<svg id=\"board\" width=\"100%\" height=\"100%\">\n"
+	svg += "<svg id=\"board\" width=\"100%%\" height=\"100%%\">\n"
 	svg += `<symbol id="blackstone" viewBox="0 0 120 120">
 			<circle cx=60 cy=60 r=45 fill="#000000" />
 			<circle cx=80 cy=80 r=10 fill="#ffffff" />
@@ -51,6 +51,6 @@ func (b *Board) PrettySVG() (svg string) {
 			}
 		}
 	}
-	svg += "</symbol>\n<use x=\"10%\" y=\"10%\" width=\"80%\" height=\"80%\" xlink:href=\"#grid\" />\n</svg>\n"
+	svg += "</symbol>\n<use x=\"10%%\" y=\"10%%\" width=\"80%%\" height=\"80%%\" xlink:href=\"#grid\" />\n</svg>\n"
 	return
 }
