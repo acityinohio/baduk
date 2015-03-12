@@ -41,11 +41,11 @@ func (b *Board) PrettySVG() (svg string) {
 			if b.Grid[y][x].Black {
 				svg += "<use x=" + strconv.Itoa(x*scale) + " y=" + strconv.Itoa(y*scale) +
 					" width=" + strconv.Itoa(scale) + " height=" + strconv.Itoa(scale) +
-					"xlink:href=\"#blackstone\" />\n"
+					" xlink:href=\"#blackstone\" />\n"
 			} else if b.Grid[y][x].White {
 				svg += "<use x=" + strconv.Itoa(x*scale) + " y=" + strconv.Itoa(y*scale) +
 					" width=" + strconv.Itoa(scale) + " height=" + strconv.Itoa(scale) +
-					"xlink:href=\"#whitestone\" />\n"
+					" xlink:href=\"#whitestone\" />\n"
 			} else {
 				continue
 			}
