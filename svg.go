@@ -47,7 +47,7 @@ func (b *Board) PrettySVG() (svg string) {
 					" width=" + strconv.Itoa(scale) + " height=" + strconv.Itoa(scale) +
 					" xlink:href=\"#whitestone\" />\n"
 			} else {
-				svg += "<rect class=\"empty-vertex\" data-x=" + strconv.Itoa(x) + " data-y=" + strconv.Itoa(y) + "\"" +
+				svg += "<rect class=\"empty-vertex\" data-x=" + strconv.Itoa(x) + " data-y=" + strconv.Itoa(y) +
 					" x=" + strconv.Itoa(x*scale) + " y=" + strconv.Itoa(y*scale) +
 					" width=" + strconv.Itoa(scale) + " height=" + strconv.Itoa(scale) +
 					" opacity=\"0.0\"/>\n"
