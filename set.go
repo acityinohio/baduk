@@ -43,7 +43,7 @@ func (p *Piece) checkCapture(checkWhite bool) {
 		p.Left.checkChain(checkWhite) //check chain liberties
 	}
 	if p.Right != nil && !p.Right.Empty && p.Right.White == checkWhite && !p.Right.hasLiberty() {
-		p.Left.checkChain(checkWhite) //check chain liberties
+		p.Right.checkChain(checkWhite) //check chain liberties
 	}
 	return
 }
