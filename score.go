@@ -26,8 +26,9 @@ func (b *Board) Score() (black, white int) {
 	go sumChan(blk, &black, &wg)
 	wg.Add(1)
 	go sumChan(wht, &white, &wg)
+	//mirror checkChain() from scoring.go, but focused on assembling empty chains
 	wg.Add(1)
-	go checkEmptyArea(blk, wht, empty, &wg)
+	go checkEmptyChains(blk, wht, empty, &wg)
 	wg.Wait()
 	return
 }
@@ -63,41 +64,71 @@ func sumChan(pipe chan int, total *int, wg *sync.WaitGroup) {
 	return
 }
 
-//Checks empty area for scoring by assembling
-//empty chains then checking for border encapsulations
-func checkEmptyArea(blk chan int, wht chan int, empty chan Piece, wg *sync.WaitGroup) {
+//Assembles chains of Empty pieces
+func checkEmptyChains(blk chan int, wht chan int, empty chan Piece, wg *sync.WaitGroup) {
 	defer wg.Done()
 	chains := make([]map[Piece]bool, 0)
-	//Assemble chains from empty Pieces
-	for p := range empty {
-		Added := false
-		for _, chi := range chains {
-			for pi := range chi {
-				//if neighbors, add to chain
-				if ((p.Up != nil) && *p.Up == pi) ||
-					((p.Down != nil) && *p.Down == pi) ||
-					((p.Left != nil) && *p.Left == pi) ||
-					((p.Right != nil) && *p.Right == pi) {
-					chi[p], Added = true, true
-					break
-				}
-			}
-			if Added {
-				break
-			}
+	checked := make(map[Piece]bool)
+	for lib := range empty {
+		if checked[lib] {
+			continue
 		}
-		if !Added {
-			t := make(map[Piece]bool)
-			t[p] = true
-			chains = append(chains, t)
+		//set up new WaitGroup to signal end of recursion
+		var ewg sync.WaitGroup
+		ewg.Add(1)
+		//Initialize chain channel
+		chainChan := make(chan map[Piece]bool, 1)
+		go func() { chainChan <- make(map[Piece]bool) }()
+		//crawls the empties, recursively
+		go emptyCrawler(lib, chainChan, &ewg)
+		ewg.Wait()
+		chain := <-chainChan
+		//adds chain to "checked"
+		for i, v := range chain {
+			checked[i] = v
 		}
+		//adds chain to chains
+		chains = append(chains, chain)
 	}
+	wg.Add(1)
+	scoreEmptyChains(blk, wht, chains, wg)
+	return
+}
+
+func emptyCrawler(p Piece, chainChan chan map[Piece]bool, ewg *sync.WaitGroup) {
+	defer ewg.Done()
+	chain := <-chainChan
+	chain[p] = true
+	chainChan <- chain
+	if p.Up != nil && p.Up.Empty && !chain[*p.Up] {
+		ewg.Add(1)
+		go emptyCrawler(*p.Up, chainChan, ewg)
+	}
+	if p.Down != nil && p.Down.Empty && !chain[*p.Down] {
+		ewg.Add(1)
+		go emptyCrawler(*p.Down, chainChan, ewg)
+	}
+	if p.Left != nil && p.Left.Empty && !chain[*p.Left] {
+		ewg.Add(1)
+		go emptyCrawler(*p.Left, chainChan, ewg)
+	}
+	if p.Right != nil && p.Right.Empty && !chain[*p.Right] {
+		ewg.Add(1)
+		go emptyCrawler(*p.Right, chainChan, ewg)
+	}
+	return
+}
+
+//Checks empty area for scoring by assembling
+//empty chains then checking for border encapsulations
+func scoreEmptyChains(blk chan int, wht chan int, chains []map[Piece]bool, wg *sync.WaitGroup) {
+	defer wg.Done()
 	//Investigate empty chain's borders
-	for _, cha := range chains {
+	for _, chain := range chains {
 		bBord, wBord := false, false
-		for che := range cha {
-			bBord = bBord || che.hasBlackBorder()
-			wBord = wBord || che.hasWhiteBorder()
+		for lib := range chain {
+			bBord = bBord || lib.hasBlackBorder()
+			wBord = wBord || lib.hasWhiteBorder()
 			if bBord && wBord {
 				break
 			}
@@ -105,9 +136,9 @@ func checkEmptyArea(blk chan int, wht chan int, empty chan Piece, wg *sync.WaitG
 		if bBord && wBord {
 			continue
 		} else if bBord {
-			blk <- len(cha)
+			blk <- len(chain)
 		} else if wBord {
-			wht <- len(cha)
+			wht <- len(chain)
 		}
 	}
 	close(blk)

@@ -87,7 +87,7 @@ func TestHasLiberty(t *testing.T) {
 
 func TestCheckCapture(t *testing.T) {
 	var b Board
-	b.Decode("BGJiYmAAUgyMDGCCARAAAP__")
+	b.Decode("BGJiYmBgYmRgYGQAEwyAAAAA__8=")
 	//Attempt top corner black chain capture
 	b.SetW(2, 0)
 	expectStr := "BGJgYIQiCA0IAAD__w=="
@@ -103,11 +103,11 @@ func TestCheckCapture(t *testing.T) {
 		t.Logf(b.PrettyString())
 	}
 	//Reset board
-	b.Decode("BGJiYmAAUgyMDGCCARAAAP__")
+	b.Decode("BGJiYmBgYmRgYGQAEwyAAAAA__8=")
 	//Attempt suicide on bottom left
 	//Should return to prior state
 	b.SetB(0, 3)
-	expectStr = "BGJiYmAAUgyMDGCCARAAAP__"
+	expectStr = "BGJiYmBgYmRgYGQAEwyAAAAA__8="
 	realStr, err = b.Encode()
 	if err != nil {
 		t.Error("Error encoding:", err)
@@ -116,14 +116,14 @@ func TestCheckCapture(t *testing.T) {
 		t.Error("Expected top board, got bottom board")
 		var c Board
 		c.Decode(expectStr)
-		t.Logf(c.PrettyString())
-		t.Logf(b.PrettyString())
+		t.Logf(expectStr + "\n")
+		t.Logf(realStr + "\n")
 	}
 	//Reset board with new setup
 	b.Decode("BATAAQEAAACCoPD_6KgtDbE9AAD__w==")
 	//Attempt middle board chain captures
 	b.SetB(2, 3)
-	expectStr = "BGJiYmBgAkIGEAVEgAAAAP__"
+	expectStr = "BGJiYmBgYmBiYABRDEwMgAAAAP__"
 	realStr, err = b.Encode()
 	if err != nil {
 		t.Error("Error encoding:", err)
@@ -140,10 +140,20 @@ func TestCheckCapture(t *testing.T) {
 func TestScore(t *testing.T) {
 	var b Board
 	b.Init(4)
+	//check empty board
 	black, white := b.Score()
 	if black != 0 || white != 0 {
 		t.Error("For empty board, expected black: 0, white: 0, got black:", black, ", white:", white)
 	}
+	//check early game
+	b.SetB(0, 0)
+	b.SetW(2, 1)
+	black, white = b.Score()
+	if black != 1 || white != 1 {
+		t.Error("Expected black: 1, white: 1, got black:", black, ", white:", white)
+		t.Logf(b.PrettyString())
+	}
+	//check later game
 	b.Decode("BGJiYmBgYmRiYGQAEwyAAAAA__8=")
 	black, white = b.Score()
 	if black != 8 || white != 6 {
