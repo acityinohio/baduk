@@ -153,6 +153,14 @@ func TestScore(t *testing.T) {
 		t.Error("Expected black: 1, white: 1, got black:", black, ", white:", white)
 		t.Logf(b.PrettyString())
 	}
+	b.SetB(1, 1)
+	b.SetW(3, 3)
+	b.SetB(0, 2)
+	black, white = b.Score()
+	if black != 4 || white != 2 {
+		t.Error("Expected black: 4, white: 2, got black:", black, ", white:", white)
+		t.Logf(b.PrettyString())
+	}
 	//check later game
 	b.Decode("BGJiYmBgYmRiYGQAEwyAAAAA__8=")
 	black, white = b.Score()

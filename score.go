@@ -75,14 +75,15 @@ func checkEmptyChains(blk chan int, wht chan int, empty chan Piece, wg *sync.Wai
 		}
 		//set up new WaitGroup to signal end of recursion
 		var ewg sync.WaitGroup
-		ewg.Add(1)
 		//Initialize chain channel
 		chainChan := make(chan map[Piece]bool, 1)
 		go func() { chainChan <- make(map[Piece]bool) }()
+		ewg.Add(1)
 		//crawls the empties, recursively
 		go emptyCrawler(lib, chainChan, &ewg)
 		ewg.Wait()
 		chain := <-chainChan
+		close(chainChan)
 		//adds chain to "checked"
 		for i, v := range chain {
 			checked[i] = v
@@ -91,7 +92,7 @@ func checkEmptyChains(blk chan int, wht chan int, empty chan Piece, wg *sync.Wai
 		chains = append(chains, chain)
 	}
 	wg.Add(1)
-	scoreEmptyChains(blk, wht, chains, wg)
+	go scoreEmptyChains(blk, wht, chains, wg)
 	return
 }
 
@@ -99,20 +100,25 @@ func emptyCrawler(p Piece, chainChan chan map[Piece]bool, ewg *sync.WaitGroup) {
 	defer ewg.Done()
 	chain := <-chainChan
 	chain[p] = true
+	//copy chain to avoid concurrent reads
+	testChain := make(map[Piece]bool)
+	for k, v := range chain {
+		testChain[k] = v
+	}
 	chainChan <- chain
-	if p.Up != nil && p.Up.Empty && !chain[*p.Up] {
+	if p.Up != nil && p.Up.Empty && !testChain[*p.Up] {
 		ewg.Add(1)
 		go emptyCrawler(*p.Up, chainChan, ewg)
 	}
-	if p.Down != nil && p.Down.Empty && !chain[*p.Down] {
+	if p.Down != nil && p.Down.Empty && !testChain[*p.Down] {
 		ewg.Add(1)
 		go emptyCrawler(*p.Down, chainChan, ewg)
 	}
-	if p.Left != nil && p.Left.Empty && !chain[*p.Left] {
+	if p.Left != nil && p.Left.Empty && !testChain[*p.Left] {
 		ewg.Add(1)
 		go emptyCrawler(*p.Left, chainChan, ewg)
 	}
-	if p.Right != nil && p.Right.Empty && !chain[*p.Right] {
+	if p.Right != nil && p.Right.Empty && !testChain[*p.Right] {
 		ewg.Add(1)
 		go emptyCrawler(*p.Right, chainChan, ewg)
 	}

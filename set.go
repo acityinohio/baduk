@@ -83,24 +83,29 @@ func crawler(pi *Piece, checkWhite bool, chainChan chan map[*Piece]bool, libChan
 	defer wg.Done()
 	chain := <-chainChan
 	chain[pi] = true
+	//copy chain to avoid concurrent reads
+	testChain := make(map[*Piece]bool)
+	for k, v := range chain {
+		testChain[k] = v
+	}
 	chainChan <- chain
 	if pi.hasLiberty() {
 		libChan <- true
 		return
 	}
-	if pi.Up != nil && pi.Up.White == checkWhite && !chain[pi.Up] {
+	if pi.Up != nil && pi.Up.White == checkWhite && !testChain[pi.Up] {
 		wg.Add(1)
 		go crawler(pi.Up, checkWhite, chainChan, libChan, wg)
 	}
-	if pi.Down != nil && pi.Down.White == checkWhite && !chain[pi.Down] {
+	if pi.Down != nil && pi.Down.White == checkWhite && !testChain[pi.Down] {
 		wg.Add(1)
 		go crawler(pi.Down, checkWhite, chainChan, libChan, wg)
 	}
-	if pi.Left != nil && pi.Left.White == checkWhite && !chain[pi.Left] {
+	if pi.Left != nil && pi.Left.White == checkWhite && !testChain[pi.Left] {
 		wg.Add(1)
 		go crawler(pi.Left, checkWhite, chainChan, libChan, wg)
 	}
-	if pi.Right != nil && pi.Right.White == checkWhite && !chain[pi.Right] {
+	if pi.Right != nil && pi.Right.White == checkWhite && !testChain[pi.Right] {
 		wg.Add(1)
 		go crawler(pi.Right, checkWhite, chainChan, libChan, wg)
 	}
