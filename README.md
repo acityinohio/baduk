@@ -1,8 +1,8 @@
-#Baduk Readme
+# Baduk Readme
 
 Yo dawg, I heard you liked Go, so I put Go in your Go so you could Go on the Go.
 
-##What?
+## What?
 
 I like Go (the game, also known as Baduk) and Go (the programming language) and decided to build this support library so I could build a Go-webapp to play Go (hence the Yo-dawging). 
 
@@ -10,7 +10,7 @@ But mainly, I built this with the express (and eventual) purpose to play Go with
 
 Further down the line, once Go reaches 1.5, I'm even going to venture making a Android app. So you can Go on the Go on the Go. :D
 
-##Usage
+## Usage
 
 Import the package like any remote repo in Go:
 
@@ -60,10 +60,10 @@ This will be super useful for ephemeral, webapp-based games with canonical URLs.
 
 For more details about the package, I've sprinkled comments throughout it like a good idomatic Gopher, which means nice GoDocs. You can [check them out here.](http://godoc.org/github.com/acityinohio/baduk)
 
-##Testing
+## Testing
 
 You can test the package with the handy "go test" command---the tests are included in the baduk_tests.go package.
 
-##Why not call this package Go?
+## Why not call this package Go?
 
 Yes, we all get off on Xzibit memes, but that goes too far, even for me. Think of the name collisions/children.
